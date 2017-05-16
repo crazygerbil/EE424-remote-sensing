@@ -6,7 +6,7 @@ import functools
 def euclid_dist(centroid, point):
     varia = 0
     for i in range(min(len(centroid), len(point))):
-        varia += (int(point[i])-int(centroid[i]))**2
+        varia += (int(point[i])-centroid[i])**2
     return (varia)**.5
 
 #@functools.lru_cache(maxsize=None)
@@ -65,11 +65,11 @@ from time import clock
 centroids = list((centroid(x,(0,0,0)) for x in range(10)))
 points = list()
 
-centroid_spacing = 200
-psuedo_epochs = 60
-epoch_size = 10
+centroid_spacing = 72 #600, 200, 72
+psuedo_epochs = 6
+epoch_size = 1
 
-if True:    dist_fn = spectral_angle
+if False:    dist_fn = spectral_angle
 else:       dist_fn = euclid_dist
 
 if __name__ == "__main__":
@@ -94,6 +94,8 @@ if __name__ == "__main__":
         print("loop:",i,"time:",clock())
         while i >= epoch_size: i -= epoch_size ###allow for more loops with less skipping
 
+        from copy import deepcopy
+        old_centroids = deepcopy(centroids)
         ### reset all centroid point lists
         for centroid in centroids:
             centroid.update()
@@ -101,11 +103,13 @@ if __name__ == "__main__":
         for p in range(i,len(points),epoch_size): ###skip through points to speed clustering
             point = points[p]
             if point.centroid:
-                point.centdist=dist_fn(tuple(point.centroid.axyz),tuple(point.xyz))
+###here
+                point.centdist=dist_fn(tuple(point.centroid.xyz),tuple(point.xyz))
             ### loop through points
             for centroid in centroids:
                 ###determine closest centorid
-                dist = dist_fn(tuple(centroid.axyz),tuple(point.xyz))
+###here
+                dist = dist_fn(tuple(centroid.xyz),tuple(point.xyz))
                 if dist <= point.centdist:
                     point.centroid = centroid
                     point.centdist = dist
@@ -114,8 +118,6 @@ if __name__ == "__main__":
         
         ##update centroids values
 #### FIXUP: The spectral angle centroids are averaged in a non-normalized form, This might be undesireable
-        from copy import deepcopy
-        old_centroids = deepcopy(centroids)
         for centroid in centroids:
             (x,y,z)=(0,0,0)
             length= len(centroid.points)
@@ -130,10 +132,15 @@ if __name__ == "__main__":
         ### show centroid movement
         for new,old in zip(centroids,old_centroids):
             new.update() ###update axyz
-            (newx,newy,newz)=new.axyz
-            (oldx,oldy,oldz)=old.axyz
-            print("Centroid",new.number)
-            print("Dx:",newx-oldx,"Dy:",newy-oldy,"Dz:",newz-oldz)
+###here
+            (newx,newy,newz)=new.xyz
+            (oldx,oldy,oldz)=old.xyz
+            print("Centroid",new.number,"\tPopulation:",len(new.points),
+                  "\tchange: {:+8d}".format(len(new.points)-len(old.points)))
+            #print("Dx:",newx-oldx,"Dy:",newy-oldy,"Dz:",newz-oldz)
+            print("x: %6.2f%%"%((newx-oldx)*100/oldx),
+                  "\ty: %6.2f%%"%((newy-oldy)*100/oldy),
+                  "\tz: %6.2f%%"%((newz-oldz)*100/oldz))
 
                 
     ##### classifying only
@@ -142,11 +149,13 @@ if __name__ == "__main__":
             centroid.points = list()
     for point in points:
         if point.centroid:
-            point.centdist=dist_fn(tuple(point.centroid.axyz),tuple(point.xyz))
+###here
+            point.centdist=dist_fn(tuple(point.centroid.xyz),tuple(point.xyz))
         ### loop through points
         for centroid in centroids:
             ###determine closest centorid
-            dist = dist_fn(tuple(centroid.axyz),tuple(point.xyz))
+###here
+            dist = dist_fn(tuple(centroid.xyz),tuple(point.xyz))
             if dist <= point.centdist:
                 point.centroid = centroid
                 point.centdist = dist
