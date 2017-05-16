@@ -31,6 +31,12 @@ class centroid(object):
         self.xyz=xyz
         self.points = list()
         self.color = (20*number,20*number,20*number)
+    def update(self):
+        xyz=self.xyz
+        magnitude = 0
+        for i in xyz: magnitude+=i**2
+        magnitude= magnitude**0.5
+        self.axyz=(xyz[0]/magnitude,xyz[1]/magnitude,xyz[2]/magnitude)
     def __repr__(self):
         return "coordinates: "+repr(self.xyz)+" centroid: "+repr(self.number) + "\n"
 
@@ -47,13 +53,10 @@ if True:    dist_fn = spectral_angle
 else:       dist_fn = euclid_dist
 
 if __name__ == "__main__":
-    #global centroids
-    #global points
     #filename = input("FileName: ")
     #filename = r"C:\Users\Harold\Downloads\LandSat\512x512 SANFR_2000_03_03_S2(chs_6,4,2)-RGB-blue.tif"
     #filename = r"C:\Users\Harold\Downloads\LandSat\1990SFv2.tif"
     filename = r"C:\Users\Harold\Downloads\512x512 SANFR_2000_03_03_S2(chs_7,4,2).tif"
-    ##with open(filename,'r') as infile:
 
     ### read in img file
     img = mpimg.imread(filename)
@@ -73,15 +76,16 @@ if __name__ == "__main__":
 
         ### reset all centroid point lists
         for centroid in centroids:
-                centroid.points = list()
+            centroid.update()
+            centroid.points = list()
         for p in range(i,len(points),10): ###skip through points to speed clustering
             point = points[p]
             if point.centroid:
-                point.centdist=dist_fn(point.centroid.xyz,point.xyz)
+                point.centdist=dist_fn(point.centroid.axyz,point.xyz)
             ### loop through points
             for centroid in centroids:
                 ###determine closest centorid
-                dist = dist_fn(centroid.xyz,point.xyz)
+                dist = dist_fn(centroid.axyz,point.xyz)
                 if dist <= point.centdist:
                     point.centroid = centroid
                     point.centdist = dist
@@ -89,6 +93,7 @@ if __name__ == "__main__":
             point.centroid.points.append(point)
         
         ##update centroids values
+#### FIXUP: The spectral angle centroids are averaged in a non-normalized form, This might be undesireable
         for centroid in centroids:
             (x,y,z)=(0,0,0)
             length= len(centroid.points)
@@ -108,11 +113,11 @@ if __name__ == "__main__":
             centroid.points = list()
     for point in points:
         if point.centroid:
-            point.centdist=dist_fn(point.centroid.xyz,point.xyz)
+            point.centdist=dist_fn(point.centroid.axyz,point.xyz)
         ### loop through points
         for centroid in centroids:
             ###determine closest centorid
-            dist = dist_fn(centroid.xyz,point.xyz)
+            dist = dist_fn(centroid.axyz,point.xyz)
             if dist <= point.centdist:
                 point.centroid = centroid
                 point.centdist = dist
