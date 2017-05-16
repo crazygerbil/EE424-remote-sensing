@@ -1,12 +1,16 @@
 ### Clustering algorithm ###
 
+import functools
+
+@functools.lru_cache(maxsize=None)
 def euclid_dist(centroid, point):
     varia = 0
     for i in range(min(len(centroid), len(point))):
         varia += (int(point[i])-int(centroid[i]))**2
     return (varia)**.5
 
-def spectral_angle(centroid, point):
+#@functools.lru_cache(maxsize=None)
+def spectral_angle_old(centroid, point):
     varia = 0
     magnitude = 0
     for i in point:
@@ -16,6 +20,23 @@ def spectral_angle(centroid, point):
         varia += (float(point[i])/magnitude-float(centroid[i]))**2
     return (varia)**.5
 
+### makes it take up way more memory, but reduces calculation time by ~20%
+@functools.lru_cache(maxsize=None)
+def spectral_angle(centroid, point):
+    varia = 0
+    point = normalize(point)
+    for i in range(min(len(centroid), len(point))):
+        varia += (point[i]-float(centroid[i]))**2
+    return (varia)**.5
+
+@functools.lru_cache(maxsize=None)
+def normalize(xyz):
+    magnitude = 0
+    for i in xyz: magnitude+=i**2
+    magnitude= magnitude**0.5
+    return (float(xyz[0])/magnitude,
+            float(xyz[1])/magnitude,
+            float(xyz[2])/magnitude)
 
 class point(object):
     def __init__(self, imgpoint):
@@ -32,24 +53,21 @@ class centroid(object):
         self.points = list()
         self.color = (20*number,20*number,20*number)
     def update(self):
-        xyz=self.xyz
-        magnitude = 0
-        for i in xyz: magnitude+=i**2
-        magnitude= magnitude**0.5
-        self.axyz=(xyz[0]/magnitude,xyz[1]/magnitude,xyz[2]/magnitude)
+        self.axyz=normalize(tuple(self.xyz))
     def __repr__(self):
         return "coordinates: "+repr(self.xyz)+" centroid: "+repr(self.number) + "\n"
 
 import matplotlib.image as mpimg
 import matplotlib.pyplot as plt
 import numpy
+from time import clock
 
 centroids = list((centroid(x,(0,0,0)) for x in range(10)))
 points = list()
 
 centroid_spacing = 200
-psuedo_epochs = 10
-epoch_size = 60
+psuedo_epochs = 60
+epoch_size = 10
 
 if True:    dist_fn = spectral_angle
 else:       dist_fn = euclid_dist
@@ -73,7 +91,7 @@ if __name__ == "__main__":
     ############Training (and classifying)
     for i in range(psuedo_epochs):
         ### epoch loop
-        print("loop:",i)
+        print("loop:",i,"time:",clock())
         while i >= epoch_size: i -= epoch_size ###allow for more loops with less skipping
 
         ### reset all centroid point lists
@@ -83,11 +101,11 @@ if __name__ == "__main__":
         for p in range(i,len(points),epoch_size): ###skip through points to speed clustering
             point = points[p]
             if point.centroid:
-                point.centdist=dist_fn(point.centroid.axyz,point.xyz)
+                point.centdist=dist_fn(tuple(point.centroid.axyz),tuple(point.xyz))
             ### loop through points
             for centroid in centroids:
                 ###determine closest centorid
-                dist = dist_fn(centroid.axyz,point.xyz)
+                dist = dist_fn(tuple(centroid.axyz),tuple(point.xyz))
                 if dist <= point.centdist:
                     point.centroid = centroid
                     point.centdist = dist
@@ -124,11 +142,11 @@ if __name__ == "__main__":
             centroid.points = list()
     for point in points:
         if point.centroid:
-            point.centdist=dist_fn(point.centroid.axyz,point.xyz)
+            point.centdist=dist_fn(tuple(point.centroid.axyz),tuple(point.xyz))
         ### loop through points
         for centroid in centroids:
             ###determine closest centorid
-            dist = dist_fn(centroid.axyz,point.xyz)
+            dist = dist_fn(tuple(centroid.axyz),tuple(point.xyz))
             if dist <= point.centdist:
                 point.centroid = centroid
                 point.centdist = dist
@@ -160,5 +178,6 @@ if __name__ == "__main__":
         for j in range(len(img[i])):
             img[i][j]= next(order).centroid.xyz
     ########Display img
+    print("Elapsed time:",clock())
     plt.imshow(img)
     plt.show()
