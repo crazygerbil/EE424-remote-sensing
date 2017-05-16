@@ -48,6 +48,8 @@ centroids = list((centroid(x,(0,0,0)) for x in range(10)))
 points = list()
 
 centroid_spacing = 200
+psuedo_epochs = 10
+epoch_size = 60
 
 if True:    dist_fn = spectral_angle
 else:       dist_fn = euclid_dist
@@ -69,16 +71,16 @@ if __name__ == "__main__":
     print(centroids)
 
     ############Training (and classifying)
-    for i in range(20):
+    for i in range(psuedo_epochs):
         ### epoch loop
         print("loop:",i)
-        while i >= 10: i -= 10 ###allow for more loops with less skipping
+        while i >= epoch_size: i -= epoch_size ###allow for more loops with less skipping
 
         ### reset all centroid point lists
         for centroid in centroids:
             centroid.update()
             centroid.points = list()
-        for p in range(i,len(points),10): ###skip through points to speed clustering
+        for p in range(i,len(points),epoch_size): ###skip through points to speed clustering
             point = points[p]
             if point.centroid:
                 point.centdist=dist_fn(point.centroid.axyz,point.xyz)
@@ -109,8 +111,9 @@ if __name__ == "__main__":
                 print("no points")
         ### show centroid movement
         for new,old in zip(centroids,old_centroids):
-            (newx,newy,newz)=new.xyz
-            (oldx,oldy,oldz)=old.xyz
+            new.update() ###update axyz
+            (newx,newy,newz)=new.axyz
+            (oldx,oldy,oldz)=old.axyz
             print("Centroid",new.number)
             print("Dx:",newx-oldx,"Dy:",newy-oldy,"Dz:",newz-oldz)
 
