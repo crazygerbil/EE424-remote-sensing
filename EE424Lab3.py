@@ -94,6 +94,8 @@ if __name__ == "__main__":
         
         ##update centroids values
 #### FIXUP: The spectral angle centroids are averaged in a non-normalized form, This might be undesireable
+        from copy import deepcopy
+        old_centroids = deepcopy(centroids)
         for centroid in centroids:
             (x,y,z)=(0,0,0)
             length= len(centroid.points)
@@ -105,6 +107,12 @@ if __name__ == "__main__":
                 centroid.xyz=(x/length,y/length,z/length)
             else:
                 print("no points")
+        ### show centroid movement
+        for new,old in zip(centroids,old_centroids):
+            (newx,newy,newz)=new.xyz
+            (oldx,oldy,oldz)=old.xyz
+            print("Centroid",new.number)
+            print("Dx:",newx-oldx,"Dy:",newy-oldy,"Dz:",newz-oldz)
 
                 
     ##### classifying only
@@ -135,6 +143,13 @@ if __name__ == "__main__":
             centroid.xyz=(x/length,y/length,z/length)
         else:
             print("no points")
+
+    ### table of: cluster pop, centroids, Std. Dev. (each axis),
+    ###     intercluster dist, dist from closest cluster, convergence threshold,
+    ###     number of iterations used
+    if True:
+        for centroid in centroids:
+            pass
 
     ########### Update Image
     order= iter(points)
