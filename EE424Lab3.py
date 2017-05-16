@@ -40,14 +40,19 @@ import numpy
 
 centroids = list((centroid(x,(0,0,0)) for x in range(10)))
 points = list()
+
+centroid_spacing = 200
+
 if False:    dist_fn = spectral_angle
 else:       dist_fn = euclid_dist
+
 if __name__ == "__main__":
     #global centroids
     #global points
     #filename = input("FileName: ")
     #filename = r"C:\Users\Harold\Downloads\LandSat\512x512 SANFR_2000_03_03_S2(chs_6,4,2)-RGB-blue.tif"
-    filename = r"C:\Users\Harold\Downloads\LandSat\1990SFv2.tif"
+    #filename = r"C:\Users\Harold\Downloads\LandSat\1990SFv2.tif"
+    filename = r"C:\Users\Harold\Downloads\512x512 SANFR_2000_03_03_S2(chs_7,4,2).tif"
     ##with open(filename,'r') as infile:
     
     img = mpimg.imread(filename)
@@ -55,16 +60,19 @@ if __name__ == "__main__":
         for j in range(len(img[i])):
             points.append(point(img[i][j]))
     for i in range(min(len(centroids),len(points))):
-        centroids[i].xyz = points[i*72].xyz
+        centroids[i].xyz = points[i*centroid_spacing].xyz
     print(centroids)
 
     ############Training (and classifying)
-    for i in range(20):
+    for i in range(50):
         ### epoch loop
         print("loop:",i)
+        while i >= 10: i -= 10 ###allow for more loops with less skipping
+
+        ### reset all centroid point lists
         for centroid in centroids:
                 centroid.points = list()
-        for p in range(i,len(points),20):
+        for p in range(i,len(points),10): ###skip through points to speed clustering
             point = points[p]
             if point.centroid:
                 point.centdist=dist_fn(point.centroid.xyz,point.xyz)
@@ -77,7 +85,8 @@ if __name__ == "__main__":
                     point.centdist = dist
             ### add point to closest centroid
             point.centroid.points.append(point)
-        ##update centroids
+        
+        ##update centroids values
         for centroid in centroids:
             (x,y,z)=(0,0,0)
             length= len(centroid.points)
