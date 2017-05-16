@@ -43,7 +43,7 @@ points = list()
 
 centroid_spacing = 200
 
-if False:    dist_fn = spectral_angle
+if True:    dist_fn = spectral_angle
 else:       dist_fn = euclid_dist
 
 if __name__ == "__main__":
@@ -54,17 +54,19 @@ if __name__ == "__main__":
     #filename = r"C:\Users\Harold\Downloads\LandSat\1990SFv2.tif"
     filename = r"C:\Users\Harold\Downloads\512x512 SANFR_2000_03_03_S2(chs_7,4,2).tif"
     ##with open(filename,'r') as infile:
-    
+
+    ### read in img file
     img = mpimg.imread(filename)
     for i in range(len(img)):
         for j in range(len(img[i])):
             points.append(point(img[i][j]))
+    ### initialize centroids to various points
     for i in range(min(len(centroids),len(points))):
         centroids[i].xyz = points[i*centroid_spacing].xyz
     print(centroids)
 
     ############Training (and classifying)
-    for i in range(50):
+    for i in range(20):
         ### epoch loop
         print("loop:",i)
         while i >= 10: i -= 10 ###allow for more loops with less skipping
