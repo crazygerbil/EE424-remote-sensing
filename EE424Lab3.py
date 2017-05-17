@@ -14,9 +14,9 @@ from copy import deepcopy
 points = list()
 
 centroid_spacing = 72 #600, 200, 72
-psuedo_epochs = 100
-epoch_size = 20 #2 works, but 20 is much faster, 1 converges in 30 epochs
-end_threshold = 2 #percent
+psuedo_epochs = 40
+epoch_size = 1 #2 works, but 20 is much faster, 1 converges in 30 epochs
+end_threshold = 1 #percent
 
 
 import functools
@@ -152,16 +152,17 @@ else:
     dist_fn = euclid_dist
 
 ### Initialaization of centroids (same as MultiSpec used)
-centroids = list((centroid(0,(173.6,131.0,136.7)),
-                  centroid(1,(145.9,111.4,132.1)),
-                  centroid(2,(118.2, 91.8,127.6)),
-                  centroid(3,( 90.5, 72.2,123.0)),
-                  centroid(4,( 62.8, 52.6,118.4)),
-                  centroid(5,( 46.9, 41.4,115.8)),
-                  centroid(6,( 42.9, 38.6,115.2)),
-                  centroid(7,( 39.0, 35.8,114.5)),
-                  centroid(8,( 35.0, 33.0,113.9)),
-                  centroid(9,( 31.0, 30.2,113.2))))
+#WARNING: I may have gotten the 2 and 7 channels backwards?
+centroids = list((centroid(0,(173.6,131.0,136.7)[::-1]),
+                  centroid(1,(145.9,111.4,132.1)[::-1]),
+                  centroid(2,(118.2, 91.8,127.6)[::-1]),
+                  centroid(3,( 90.5, 72.2,123.0)[::-1]),
+                  centroid(4,( 62.8, 52.6,118.4)[::-1]),
+                  centroid(5,( 46.9, 41.4,115.8)[::-1]),
+                  centroid(6,( 42.9, 38.6,115.2)[::-1]),
+                  centroid(7,( 39.0, 35.8,114.5)[::-1]),
+                  centroid(8,( 35.0, 33.0,113.9)[::-1]),
+                  centroid(9,( 31.0, 30.2,113.2)[::-1])))
 C_INIT_FLAG = True
 
 
