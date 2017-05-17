@@ -61,13 +61,28 @@ import matplotlib.image as mpimg
 import matplotlib.pyplot as plt
 import numpy
 from time import clock
+from copy import deepcopy
 
-centroids = list((centroid(x,(0,0,0)) for x in range(10)))
+####centroids = list((centroid(x,(0,0,0)) for x in range(10)))
 points = list()
 
 centroid_spacing = 72 #600, 200, 72
 psuedo_epochs = 6
 epoch_size = 1
+
+### Initialaization of centroids (same as MultiSpec used
+centroids = list((centroid(0,(173.6,131.0,136.7)),
+                  centroid(1,(145.9,111.4,132.1)),
+                  centroid(2,(118.2, 91.8,127.6)),
+                  centroid(3,( 90.5, 72.2,123.0)),
+                  centroid(4,( 62.8, 52.6,118.4)),
+                  centroid(5,( 46.9, 41.4,115.8)),
+                  centroid(6,( 42.9, 38.6,115.2)),
+                  centroid(7,( 39.0, 35.8,114.5)),
+                  centroid(8,( 35.0, 33.0,113.9)),
+                  centroid(9,( 31.0, 30.2,113.2))))
+C_INIT_FLAG = True
+                 
 
 if False:    dist_fn = spectral_angle
 else:       dist_fn = euclid_dist
@@ -83,9 +98,10 @@ if __name__ == "__main__":
     for i in range(len(img)):
         for j in range(len(img[i])):
             points.append(point(img[i][j]))
-    ### initialize centroids to various points
-    for i in range(min(len(centroids),len(points))):
-        centroids[i].xyz = points[i*centroid_spacing].xyz
+    if not C_INIT_FLAG: ##check if centroids have been initialized
+        ### initialize centroids to various points
+        for i in range(min(len(centroids),len(points))):
+            centroids[i].xyz = points[i*centroid_spacing].xyz
     print(centroids)
 
     ############Training (and classifying)
@@ -94,7 +110,7 @@ if __name__ == "__main__":
         print("loop:",i,"time:",clock())
         while i >= epoch_size: i -= epoch_size ###allow for more loops with less skipping
 
-        from copy import deepcopy
+        ###make a copy of the centroids list
         old_centroids = deepcopy(centroids)
         ### reset all centroid point lists
         for centroid in centroids:
