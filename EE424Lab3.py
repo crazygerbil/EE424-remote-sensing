@@ -67,7 +67,7 @@ from copy import deepcopy
 points = list()
 
 centroid_spacing = 72 #600, 200, 72
-psuedo_epochs = 6
+psuedo_epochs = 20
 epoch_size = 1
 
 ### Initialaization of centroids (same as MultiSpec used
@@ -146,6 +146,7 @@ if __name__ == "__main__":
             else:
                 print("no points")
         ### show centroid movement
+        maxi_move = 0
         for new,old in zip(centroids,old_centroids):
             new.update() ###update axyz
 ###here
@@ -154,9 +155,14 @@ if __name__ == "__main__":
             print("Centroid",new.number,"\tPopulation:",len(new.points),
                   "\tchange: {:+8d}".format(len(new.points)-len(old.points)))
             #print("Dx:",newx-oldx,"Dy:",newy-oldy,"Dz:",newz-oldz)
-            print("x: %6.2f%%"%((newx-oldx)*100/oldx),
-                  "\ty: %6.2f%%"%((newy-oldy)*100/oldy),
-                  "\tz: %6.2f%%"%((newz-oldz)*100/oldz))
+            (pdx,pdy,pdz)=((newx-oldx)*100/oldx,
+                           (newy-oldy)*100/oldy,
+                           (newz-oldz)*100/oldz)
+            maxi_move= max(abs(maxi_move),abs(pdx),abs(pdy),abs(pdz))
+            print("x: %6.2f%%"%pdx,
+                  "\ty: %6.2f%%"%pdy,
+                  "\tz: %6.2f%%"%pdz)
+        print("Maximum change: %6.2f%%"%maxi_move)
 
                 
     ##### classifying only
@@ -206,3 +212,8 @@ if __name__ == "__main__":
     print("Elapsed time:",clock())
     plt.imshow(img)
     plt.show()
+
+def showimg():
+    plt.imshow(img)
+    plt.show()
+    
