@@ -14,8 +14,8 @@ from copy import deepcopy
 points = list()
 
 centroid_spacing = 72 #600, 200, 72
-psuedo_epochs = 60
-epoch_size = 1 #2 works, but 20 is much faster, 1 converges in 30 epochs
+psuedo_epochs = 100
+epoch_size = 20 #2 works, but 20 is much faster, 1 converges in 30 epochs
 end_threshold = 2 #percent
 
 
@@ -46,7 +46,7 @@ def normalize(xyz):
             float(xyz[1])/magnitude,
             float(xyz[2])/magnitude)
 
-def print_cent_move(centroids,old_centroids):
+def print_cent_move(centroids,old_centroids,total_changed=False,percent=0):
     ### show centroid movement
     maxi_move = 0
     for new,old in zip(centroids,old_centroids):
@@ -63,6 +63,8 @@ def print_cent_move(centroids,old_centroids):
         maxi_move= max(abs(maxi_move),abs(pdx),abs(pdy),abs(pdz))
         #print("x: %6.2f%%"%pdx,"\ty: %6.2f%%"%pdy,"\tz: %6.2f%%"%pdz)
     print("Maximum change: %6.2f%%"%maxi_move)
+    if total_changed:
+        print("Points changed: {:6d} {:6.3f}%".format(total_changed,percent))
     return maxi_move
 
 def print_stats(centroids,maxi_move,passes):
@@ -181,6 +183,7 @@ if __name__ == "__main__":
             centroids[i].update()
     print(centroids)
 
+    iter_length=len(points)//epoch_size
 
 
     ############Training (and classifying)
@@ -197,21 +200,25 @@ if __name__ == "__main__":
             centroid.update()
             old.update()
             centroid.points = list()
+        total_changed = 0
         for p in range(i,len(points),epoch_size): ###skip through points to speed clustering
             point = points[p]
             if point.centroid:
 ###here
                 point.centdist=dist_fn(tuple(point.centroid.axyz),tuple(point.xyz))
             ### loop through points
+            change_flag = False # tracks if a point changes centroids
             for centroid in centroids:
                 ###determine closest centorid
 ###here
                 dist = dist_fn(tuple(centroid.axyz),tuple(point.xyz))
-                if dist <= point.centdist:
+                if dist < point.centdist:
                     point.centroid = centroid
                     point.centdist = dist
+                    change_flag = True
             ### add point to closest centroid
             point.centroid.points.append(point)
+            if change_flag: total_changed+=1
         
         ##update centroids values
 #### FIXUP: The spectral angle centroids are averaged in a non-normalized form, This might be undesireable
@@ -229,7 +236,8 @@ if __name__ == "__main__":
                 print("no points")
 
         ### Print centroid movement and check if we have converged
-        maxi_move=print_cent_move(centroids,old_centroids)
+        maxi_move=print_cent_move(centroids,old_centroids,total_changed,
+                                  100*total_changed/iter_length)
         if maxi_move < end_threshold:
             print("clusters converged, time:",clock())
             break;
