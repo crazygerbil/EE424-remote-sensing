@@ -1,5 +1,21 @@
 ### Clustering algorithm ###
 
+use_spectral_angle = False
+import matplotlib.image as mpimg
+import matplotlib.pyplot as plt
+import numpy
+from time import clock
+from copy import deepcopy
+
+####centroids = list((centroid(x,(0,0,0)) for x in range(10)))
+points = list()
+
+centroid_spacing = 72 #600, 200, 72
+psuedo_epochs = 100
+epoch_size = 20 #2 works, but 20 is much faster, 1 converges in 30 epochs
+end_threshold = 2 #percent
+
+
 import functools
 
 @functools.lru_cache(maxsize=None)
@@ -46,28 +62,28 @@ def print_cent_move(centroids,old_centroids):
 ###here
         (newx,newy,newz)=new.xyz
         (oldx,oldy,oldz)=old.xyz
-        print("Centroid",new.number,"\tPopulation:",len(new.points),
+        print("Centroid",new.number,"\tPopulation:%7d"%len(new.points),
               "\tchange: {:+8d}".format(len(new.points)-len(old.points)))
         #print("Dx:",newx-oldx,"Dy:",newy-oldy,"Dz:",newz-oldz)
         (pdx,pdy,pdz)=((newx-oldx)*100/oldx,
                        (newy-oldy)*100/oldy,
                        (newz-oldz)*100/oldz)
         maxi_move= max(abs(maxi_move),abs(pdx),abs(pdy),abs(pdz))
-        print("x: %6.2f%%"%pdx,
-              "\ty: %6.2f%%"%pdy,
-              "\tz: %6.2f%%"%pdz)
+        #print("x: %6.2f%%"%pdx,"\ty: %6.2f%%"%pdy,"\tz: %6.2f%%"%pdz)
     print("Maximum change: %6.2f%%"%maxi_move)
     return maxi_move
+
 def print_stats(centroids,maxi_move,passes):
     for centroid in centroids:
         print("Centroid %d"%centroid.number)
-        print("Population:",len(centroid.points))
+        print("Population:",len(centroid.points),
+              "or {:6.3f}%".format(100*len(centroid.points)/(512*512)))
 
         ###Position
         print("Center:",end="")
         if (len(centroid.xyz) != 3): raise("dimensionality")
 ###here Maybe
-        for i,axis in zip(centroid.xyz,("\tx:\t","\ty:\t","\tz:\t")):
+        for i,axis in zip(centroid.xyz,("\t2:\t","\t4:\t","\t7:\t")):
             print(axis,i,sep="",end="")
         print()
 
@@ -75,7 +91,7 @@ def print_stats(centroids,maxi_move,passes):
         print("Std. Dev.: ",end="")
         centroid.calc_std_dev()
         if (len(centroid.std_devs) != 3): raise("dimensionality")
-        for i,axis in zip(centroid.std_devs,("x:\t","\ty:\t","\tz:\t")):
+        for i,axis in zip(centroid.std_devs,("2:\t","\t4:\t","\t7:\t")):
             print(axis,i,sep="",end="")
         print()
 
@@ -101,11 +117,16 @@ class point(object):
         return "coordinates: "+repr(self.xyz)+"centroid: "+repr(self.centroid) + ", " + repr(self.centdist)+"\n"
     
 class centroid(object):
-    def __init__(self, number, xyz):
+    def __init__(self, number, xyz, color=False):
         self.number = number
         self.xyz=xyz
         self.points = list()
-        self.color = (20*number,20*number,20*number)
+        if not color:
+            self.color = (20*number,20*number,20*number)
+            self.cp=False
+        else:
+            self.color = color
+            self.cp=True
     def update(self):
         self.axyz=normalize(tuple(self.xyz))
     def calc_avg_dist(self):
@@ -124,19 +145,10 @@ class centroid(object):
     def __repr__(self):
         return "coordinates: "+repr(self.xyz)+" centroid: "+repr(self.number) + "\n"
 
-import matplotlib.image as mpimg
-import matplotlib.pyplot as plt
-import numpy
-from time import clock
-from copy import deepcopy
 
-####centroids = list((centroid(x,(0,0,0)) for x in range(10)))
-points = list()
-
-centroid_spacing = 72 #600, 200, 72
-psuedo_epochs = 10#0
-epoch_size = 20
-end_threshold = 2 #percent
+### Assign distance function as desired
+if use_spectral_angle:    dist_fn = spectral_angle
+else:       dist_fn = euclid_dist
 
 ### Initialaization of centroids (same as MultiSpec used)
 centroids = list((centroid(0,(173.6,131.0,136.7)),
@@ -150,10 +162,7 @@ centroids = list((centroid(0,(173.6,131.0,136.7)),
                   centroid(8,( 35.0, 33.0,113.9)),
                   centroid(9,( 31.0, 30.2,113.2))))
 C_INIT_FLAG = True
-                 
 
-if False:    dist_fn = spectral_angle
-else:       dist_fn = euclid_dist
 
 if __name__ == "__main__":
     #filename = input("FileName: ")
@@ -184,8 +193,9 @@ if __name__ == "__main__":
         ###make a copy of the centroids list
         old_centroids = deepcopy(centroids)
         ### reset all centroid point lists
-        for centroid in centroids:
+        for centroid,old in zip(centroids,old_centroids):
             centroid.update()
+            old.update()
             centroid.points = list()
         for p in range(i,len(points),epoch_size): ###skip through points to speed clustering
             point = points[p]
@@ -270,7 +280,10 @@ if __name__ == "__main__":
     order= iter(points)
     for i in range(len(img)):
         for j in range(len(img[i])):
-            img[i][j]= next(order).centroid.xyz
+            nxt=next(order)
+            if nxt.centroid.cp: color= nxt.centroid.color
+            else: color= nxt.centroid.xyz
+            img[i][j]= color
     ########Display img
     print("Elapsed time:",clock())
     plt.imshow(img)
@@ -281,4 +294,6 @@ if __name__ == "__main__":
 def showimg():
     plt.imshow(img)
     plt.show()
-    
+
+def saveimg(fname,image):
+    mpimg.imsave(fname,image)
