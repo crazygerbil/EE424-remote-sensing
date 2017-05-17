@@ -179,8 +179,12 @@ if __name__ == "__main__":
                 
     ##### classifying only
     print("classify")
+    ###make a copy of the centroids list
+    old_centroids = deepcopy(centroids)
+    ### reset all centroid point lists
     for centroid in centroids:
-            centroid.points = list()
+        centroid.update()
+        centroid.points = list()
     for point in points:
         if point.centroid:
 ###here
@@ -211,6 +215,8 @@ if __name__ == "__main__":
     ### table of: cluster pop, centroids, Std. Dev. (each axis),
     ###     intercluster dist, dist from closest cluster, convergence threshold,
     ###     number of iterations used
+    print_cent_move(centroids,old_centroids)
+    
     if True:
         for centroid in centroids:
             pass
