@@ -170,33 +170,11 @@ if __name__ == "__main__":
             else:
                 print("no points")
 
-        if True:
-            maxi_move=print_cent_move(centroids,old_centroids)
-            if maxi_move < end_threshold:
-                print("clusters converged")
-                break;
-        else:
-            ### show centroid movement
-            maxi_move = 0
-            for new,old in zip(centroids,old_centroids):
-                new.update() ###update axyz
-    ###here
-                (newx,newy,newz)=new.xyz
-                (oldx,oldy,oldz)=old.xyz
-                print("Centroid",new.number,"\tPopulation:",len(new.points),
-                      "\tchange: {:+8d}".format(len(new.points)-len(old.points)))
-                #print("Dx:",newx-oldx,"Dy:",newy-oldy,"Dz:",newz-oldz)
-                (pdx,pdy,pdz)=((newx-oldx)*100/oldx,
-                               (newy-oldy)*100/oldy,
-                               (newz-oldz)*100/oldz)
-                maxi_move= max(abs(maxi_move),abs(pdx),abs(pdy),abs(pdz))
-                print("x: %6.2f%%"%pdx,
-                      "\ty: %6.2f%%"%pdy,
-                      "\tz: %6.2f%%"%pdz)
-            print("Maximum change: %6.2f%%"%maxi_move)
-            if maxi_move < end_threshold:
-                print("clusters converged")
-                break;
+
+        maxi_move=print_cent_move(centroids,old_centroids)
+        if maxi_move < end_threshold:
+            print("clusters converged")
+            break;
 
                 
     ##### classifying only
