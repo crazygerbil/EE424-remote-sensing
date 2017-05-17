@@ -94,7 +94,7 @@ psuedo_epochs = 100
 epoch_size = 20
 end_threshold = 2 #percent
 
-### Initialaization of centroids (same as MultiSpec used
+### Initialaization of centroids (same as MultiSpec used)
 centroids = list((centroid(0,(173.6,131.0,136.7)),
                   centroid(1,(145.9,111.4,132.1)),
                   centroid(2,(118.2, 91.8,127.6)),
@@ -170,10 +170,10 @@ if __name__ == "__main__":
             else:
                 print("no points")
 
-
+        ### Print centroid movement and check if we have converged
         maxi_move=print_cent_move(centroids,old_centroids)
         if maxi_move < end_threshold:
-            print("clusters converged")
+            print("clusters converged, time:",clock())
             break;
 
                 
