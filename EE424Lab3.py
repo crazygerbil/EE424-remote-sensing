@@ -58,7 +58,38 @@ def print_cent_move(centroids,old_centroids):
               "\tz: %6.2f%%"%pdz)
     print("Maximum change: %6.2f%%"%maxi_move)
     return maxi_move
+def print_stats(centroids,maxi_move,passes):
+    for centroid in centroids:
+        print("Centroid %d"%centroid.number)
+        print("Population:",len(centroid.points))
 
+        ###Position
+        print("Center:",end="")
+        if (len(centroid.xyz) != 3): raise("dimensionality")
+###here Maybe
+        for i,axis in zip(centroid.xyz,("\tx:\t","\ty:\t","\tz:\t")):
+            print(axis,i,sep="",end="")
+        print()
+
+        ###Std Dev
+        print("Std. Dev.: ",end="")
+        centroid.calc_std_dev()
+        if (len(centroid.std_devs) != 3): raise("dimensionality")
+        for i,axis in zip(centroid.std_devs,("x:\t","\ty:\t","\tz:\t")):
+            print(axis,i,sep="",end="")
+        print()
+
+        ### Avg distance:
+        print("Avg. distance from centroid: ",end="")
+        if (len(centroid.std_devs) != 3): raise("dimensionality")
+        print(centroid.calc_avg_dist())
+
+        ###end centroid
+        print()
+    print("Convergence Threshold Nominal:{:6.2f}%\tActual:{:6.2f}%".format\
+          (end_threshold,maxi_move))
+    print("Cluster convergence passes: {:d}, +1 final classification pass"\
+          .format(passes+1))
 
 
 class point(object):
@@ -233,38 +264,7 @@ if __name__ == "__main__":
     ###     number of iterations used
     maxi_move=print_cent_move(centroids,old_centroids)
     
-    if True:#print_stats(centroids,maximove,passes)
-        for centroid in centroids:
-            print("Centroid %d"%centroid.number)
-            print("Population:",len(centroid.points))
-
-            ###Position
-            print("Center:",end="")
-            if (len(centroid.xyz) != 3): raise("dimensionality")
-###Here Maybe
-            for i,axis in zip(centroid.xyz,("\tx:\t","\ty:\t","\tz:\t")):
-                print(axis,i,sep="",end="")
-            print()
-
-            ###Std Dev
-            print("Std. Dev.: ",end="")
-            centroid.calc_std_dev()
-            if (len(centroid.std_devs) != 3): raise("dimensionality")
-            for i,axis in zip(centroid.std_devs,("x:\t","\ty:\t","\tz:\t")):
-                print(axis,i,sep="",end="")
-            print()
-
-            ### Avg distance:
-            print("Avg. distance from centroid: ",end="")
-            if (len(centroid.std_devs) != 3): raise("dimensionality")
-            print(centroid.calc_avg_dist())
-
-            ###end centroid
-            print()
-        print("Convergence Threshold Nominal:{:6.2f}%\tActual:{:6.2f}%".format\
-              (end_threshold,maxi_move))
-        print("Cluster convergence passes: {:d}, +1 final classification pass"\
-              .format(passes+1))
+    print_stats(centroids,maxi_move,passes)
 
     ########### Update Image
     order= iter(points)
