@@ -1,6 +1,7 @@
 ### Clustering algorithm ###
 
-use_spectral_angle = False
+use_spectral_angle = True
+#### note, also search for "###here" and change things
 import matplotlib.image as mpimg
 import matplotlib.pyplot as plt
 import numpy
@@ -11,7 +12,7 @@ from copy import deepcopy
 points = list()
 
 centroid_spacing = 72 #600, 200, 72
-psuedo_epochs = 100
+psuedo_epochs = 200
 epoch_size = 20 #2 works, but 20 is much faster, 1 converges in 30 epochs
 end_threshold = 2 #percent
 
@@ -23,17 +24,6 @@ def euclid_dist(centroid, point):
     varia = 0
     for i in range(min(len(centroid), len(point))):
         varia += (int(point[i])-centroid[i])**2
-    return (varia)**.5
-
-#@functools.lru_cache(maxsize=None)
-def spectral_angle_old(centroid, point):
-    varia = 0
-    magnitude = 0
-    for i in point:
-        magnitude+=i**2
-    magnitude= magnitude**0.5
-    for i in range(min(len(centroid), len(point))):
-        varia += (float(point[i])/magnitude-float(centroid[i]))**2
     return (varia)**.5
 
 ### makes it take up way more memory, but reduces calculation time by ~20%
@@ -60,8 +50,8 @@ def print_cent_move(centroids,old_centroids):
     for new,old in zip(centroids,old_centroids):
         new.update() ###update axyz
 ###here
-        (newx,newy,newz)=new.xyz
-        (oldx,oldy,oldz)=old.xyz
+        (newx,newy,newz)=new.axyz
+        (oldx,oldy,oldz)=old.axyz
         print("Centroid",new.number,"\tPopulation:%7d"%len(new.points),
               "\tchange: {:+8d}".format(len(new.points)-len(old.points)))
         #print("Dx:",newx-oldx,"Dy:",newy-oldy,"Dz:",newz-oldz)
@@ -133,7 +123,7 @@ class centroid(object):
         total=0
         for point in self.points:
 ###here
-            total+=dist_fn(tuple(self.xyz),tuple(point.xyz))
+            total+=dist_fn(tuple(self.axyz),tuple(point.xyz))
         return total/len(self.points)
     def calc_std_dev(self):
         dimensionality = len(self.xyz)
@@ -201,12 +191,12 @@ if __name__ == "__main__":
             point = points[p]
             if point.centroid:
 ###here
-                point.centdist=dist_fn(tuple(point.centroid.xyz),tuple(point.xyz))
+                point.centdist=dist_fn(tuple(point.centroid.axyz),tuple(point.xyz))
             ### loop through points
             for centroid in centroids:
                 ###determine closest centorid
 ###here
-                dist = dist_fn(tuple(centroid.xyz),tuple(point.xyz))
+                dist = dist_fn(tuple(centroid.axyz),tuple(point.xyz))
                 if dist <= point.centdist:
                     point.centroid = centroid
                     point.centdist = dist
@@ -245,12 +235,12 @@ if __name__ == "__main__":
     for point in points:
         if point.centroid:
 ###here
-            point.centdist=dist_fn(tuple(point.centroid.xyz),tuple(point.xyz))
+            point.centdist=dist_fn(tuple(point.centroid.axyz),tuple(point.xyz))
         ### loop through points
         for centroid in centroids:
             ###determine closest centorid
 ###here
-            dist = dist_fn(tuple(centroid.xyz),tuple(point.xyz))
+            dist = dist_fn(tuple(centroid.axyz),tuple(point.xyz))
             if dist <= point.centdist:
                 point.centroid = centroid
                 point.centdist = dist
