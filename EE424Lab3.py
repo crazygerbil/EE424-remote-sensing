@@ -144,8 +144,10 @@ class centroid(object):
 
 
 ### Assign distance function as desired
-if use_spectral_angle:    dist_fn = spectral_angle
-else:       dist_fn = euclid_dist
+if use_spectral_angle:
+    dist_fn = spectral_angle
+else:
+    dist_fn = euclid_dist
 
 ### Initialaization of centroids (same as MultiSpec used)
 centroids = list((centroid(0,(173.6,131.0,136.7)),
