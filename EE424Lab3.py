@@ -77,6 +77,19 @@ class centroid(object):
         self.color = (20*number,20*number,20*number)
     def update(self):
         self.axyz=normalize(tuple(self.xyz))
+    def calc_avg_dist(self):
+        total=0
+        for point in self.points:
+###here
+            total+=dist_fn(tuple(self.xyz),tuple(point.xyz))
+        return total/len(self.points)
+    def calc_std_dev(self):
+        dimensionality = len(self.xyz)
+        totals_vari=[0]*dimensionality
+        for point in self.points:
+            for i in range(dimensionality):
+                totals_vari[i]+=(point.xyz[i]-self.xyz[i])**2
+        self.std_devs=[(i/len(self.points))**0.5 for i in totals_vari]
     def __repr__(self):
         return "coordinates: "+repr(self.xyz)+" centroid: "+repr(self.number) + "\n"
 
@@ -90,7 +103,7 @@ from copy import deepcopy
 points = list()
 
 centroid_spacing = 72 #600, 200, 72
-psuedo_epochs = 100
+psuedo_epochs = 10#0
 epoch_size = 20
 end_threshold = 2 #percent
 
@@ -128,10 +141,13 @@ if __name__ == "__main__":
             centroids[i].xyz = points[i*centroid_spacing].xyz
     print(centroids)
 
+
+
     ############Training (and classifying)
     for i in range(psuedo_epochs):
         ### epoch loop
         print("loop:",i,"time:",clock())
+        passes = i
         while i >= epoch_size: i -= epoch_size ###allow for more loops with less skipping
 
         ###make a copy of the centroids list
@@ -215,11 +231,40 @@ if __name__ == "__main__":
     ### table of: cluster pop, centroids, Std. Dev. (each axis),
     ###     intercluster dist, dist from closest cluster, convergence threshold,
     ###     number of iterations used
-    print_cent_move(centroids,old_centroids)
+    maxi_move=print_cent_move(centroids,old_centroids)
     
-    if True:
+    if True:#print_stats(centroids,maximove,passes)
         for centroid in centroids:
-            pass
+            print("Centroid %d"%centroid.number)
+            print("Population:",len(centroid.points))
+
+            ###Position
+            print("Center:",end="")
+            if (len(centroid.xyz) != 3): raise("dimensionality")
+###Here Maybe
+            for i,axis in zip(centroid.xyz,("\tx:\t","\ty:\t","\tz:\t")):
+                print(axis,i,sep="",end="")
+            print()
+
+            ###Std Dev
+            print("Std. Dev.: ",end="")
+            centroid.calc_std_dev()
+            if (len(centroid.std_devs) != 3): raise("dimensionality")
+            for i,axis in zip(centroid.std_devs,("x:\t","\ty:\t","\tz:\t")):
+                print(axis,i,sep="",end="")
+            print()
+
+            ### Avg distance:
+            print("Avg. distance from centroid: ",end="")
+            if (len(centroid.std_devs) != 3): raise("dimensionality")
+            print(centroid.calc_avg_dist())
+
+            ###end centroid
+            print()
+        print("Convergence Threshold Nominal:{:6.2f}%\tActual:{:6.2f}%".format\
+              (end_threshold,maxi_move))
+        print("Cluster convergence passes: {:d}, +1 final classification pass"\
+              .format(passes+1))
 
     ########### Update Image
     order= iter(points)
@@ -230,6 +275,8 @@ if __name__ == "__main__":
     print("Elapsed time:",clock())
     plt.imshow(img)
     plt.show()
+
+######Legendize, Somehow
 
 def showimg():
     plt.imshow(img)
