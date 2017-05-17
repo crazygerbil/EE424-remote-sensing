@@ -1,7 +1,9 @@
 ### Clustering algorithm ###
 
-use_spectral_angle = True
+use_spectral_angle = False
 #### note, also search for "###here" and change things
+###### actually should be fine now
+
 import matplotlib.image as mpimg
 import matplotlib.pyplot as plt
 import numpy
@@ -12,8 +14,8 @@ from copy import deepcopy
 points = list()
 
 centroid_spacing = 72 #600, 200, 72
-psuedo_epochs = 200
-epoch_size = 20 #2 works, but 20 is much faster, 1 converges in 30 epochs
+psuedo_epochs = 60
+epoch_size = 1 #2 works, but 20 is much faster, 1 converges in 30 epochs
 end_threshold = 2 #percent
 
 
@@ -110,6 +112,7 @@ class centroid(object):
     def __init__(self, number, xyz, color=False):
         self.number = number
         self.xyz=xyz
+        self.update()
         self.points = list()
         if not color:
             self.color = (20*number,20*number,20*number)
@@ -117,8 +120,12 @@ class centroid(object):
         else:
             self.color = color
             self.cp=True
-    def update(self):
-        self.axyz=normalize(tuple(self.xyz))
+    if use_spectral_angle:
+        def update(self):
+            self.axyz=normalize(tuple(self.xyz))
+    else:
+        def update(self):
+            self.axyz=self.xyz
     def calc_avg_dist(self):
         total=0
         for point in self.points:
@@ -169,6 +176,7 @@ if __name__ == "__main__":
         ### initialize centroids to various points
         for i in range(min(len(centroids),len(points))):
             centroids[i].xyz = points[i*centroid_spacing].xyz
+            centroids[i].update()
     print(centroids)
 
 
@@ -214,6 +222,7 @@ if __name__ == "__main__":
                     y+=point.xyz[1]
                     z+=point.xyz[2]
                 centroid.xyz=(x/length,y/length,z/length)
+                centroid.update()
             else:
                 print("no points")
 
@@ -256,6 +265,7 @@ if __name__ == "__main__":
                 y+=point.xyz[1]
                 z+=point.xyz[2]
             centroid.xyz=(x/length,y/length,z/length)
+            centroid.update()
         else:
             print("no points")
 
