@@ -67,8 +67,9 @@ from copy import deepcopy
 points = list()
 
 centroid_spacing = 72 #600, 200, 72
-psuedo_epochs = 20
-epoch_size = 1
+psuedo_epochs = 100
+epoch_size = 20
+end_threshold = 2 #percent
 
 ### Initialaization of centroids (same as MultiSpec used
 centroids = list((centroid(0,(173.6,131.0,136.7)),
@@ -163,6 +164,9 @@ if __name__ == "__main__":
                   "\ty: %6.2f%%"%pdy,
                   "\tz: %6.2f%%"%pdz)
         print("Maximum change: %6.2f%%"%maxi_move)
+        if maxi_move < end_threshold:
+            print("clusters converged")
+            break;
 
                 
     ##### classifying only
