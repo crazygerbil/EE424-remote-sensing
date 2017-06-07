@@ -13,7 +13,7 @@ from copy import deepcopy
 ####centroids = list((centroid(x,(0,0,0)) for x in range(10)))
 points = list()
 
-centroid_spacing = 72 #600, 200, 72
+centroid_spacing = 200 #600, 200, 72
 psuedo_epochs = 40
 epoch_size = 1 #2 works, but 20 is much faster, 1 converges in 30 epochs
 end_threshold = 1 #percent
@@ -25,7 +25,7 @@ import functools
 def euclid_dist(centroid, point):
     varia = 0
     for i in range(min(len(centroid), len(point))):
-        varia += (int(point[i])-centroid[i])**2
+        varia += (float(point[i])-centroid[i])**2
     return (varia)**.5
 
 ### makes it take up way more memory, but reduces calculation time by ~20%
@@ -163,14 +163,15 @@ centroids = list((centroid(0,(173.6,131.0,136.7)[::-1]),
                   centroid(7,( 39.0, 35.8,114.5)[::-1]),
                   centroid(8,( 35.0, 33.0,113.9)[::-1]),
                   centroid(9,( 31.0, 30.2,113.2)[::-1])))
-C_INIT_FLAG = True
+C_INIT_FLAG = False
 
 
 if __name__ == "__main__":
     #filename = input("FileName: ")
     #filename = r"C:\Users\Harold\Downloads\LandSat\512x512 SANFR_2000_03_03_S2(chs_6,4,2)-RGB-blue.tif"
     #filename = r"C:\Users\Harold\Downloads\LandSat\1990SFv2.tif"
-    filename = r"C:\Users\Harold\Downloads\512x512 SANFR_2000_03_03_S2(chs_7,4,2).tif"
+    #filename = r"C:\Users\Harold\Downloads\512x512 SANFR_2000_03_03_S2(chs_7,4,2).tif"
+    filename = r"C:\Users\Harold\Dropbox\Projects\rgb-compose-742.png"
 
     ### read in img file
     img = mpimg.imread(filename)
