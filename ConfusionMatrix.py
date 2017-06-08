@@ -205,6 +205,8 @@ if __name__ == "__main__":
             print(confusion[clas1][clas2],end=",\t")
         print()
 
+#sorted(dict((("1",2),("4",1))).items(),key=lambda x: x[1])
+#[('4', 1), ('1', 2)]
 
 
 def showimg():
